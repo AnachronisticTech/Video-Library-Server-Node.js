@@ -25,9 +25,9 @@ AuthorSchema
 .get(function () {
     if (this.date_of_birth != null) {
         if (this.date_of_death != null) {
-            return (this.date_of_death.getYear() - this.date_of_birth.getYear()).toString();
+            return (moment(this.date_of_birth).format('MMMM Do, YYYY') +' - '+ moment(this.date_of_death).format('MMMM Do, YYYY'));
         } else {
-            return (new Date().getYear() - this.date_of_birth.getYear()).toString();
+            return (moment(this.date_of_birth).format('MMMM Do, YYYY') +' - Present');
         }
     } else {
         return "Unknown";
