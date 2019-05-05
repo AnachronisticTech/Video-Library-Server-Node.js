@@ -15,25 +15,34 @@ html(lang='en')
                     block sidebar
                         ul(class='sidebar-nav')
                             li 
-                                a(href='/catalog') Home
+                                //- a(href='/catalog') Home
+                                a(href='/library') Home
                             li 
-                                a(href='/catalog/books') All books
+                                //- a(href='/catalog/books') All books
+                                a(href='/library/videos') All videos
                             li 
-                                a(href='/catalog/authors') All authors
+                                //- a(href='/catalog/authors') All authors
+                                a(href='/library/producers') All producers
                             li 
-                                a(href='/catalog/genres') All genres
+                                //- a(href='/catalog/genres') All genres
+                                a(href='/library/tags') All tags
                             li 
-                                a(href='/catalog/bookinstances') All book-instances
+                                //- a(href='/catalog/bookinstances') All book-instances
+                                a(href='/library/performers') All performers
                             li 
                                 hr
                             li 
-                                a(href='/catalog/author/create') Create new author
+                                //- a(href='/catalog/author/create') Create new author
+                                a(href='/library/producer/create') Create new producer
                             li 
-                                a(href='/catalog/genre/create') Create new genre
+                                //- a(href='/catalog/genre/create') Create new genre
+                                a(href='/library/tag/create') Create new tag
                             li 
-                                a(href='/catalog/book/create') Create new book
+                                //- a(href='/catalog/book/create') Create new book
+                                a(href='/library/video/create') Create new video
                             li 
-                                a(href='/catalog/bookinstance/create') Create new book instance (copy)
+                                //- a(href='/catalog/bookinstance/create') Create new book instance (copy)
+                                a(href='/library/performer/create') Create new performer
                         
                 div(class='col-sm-10')
                     block content
