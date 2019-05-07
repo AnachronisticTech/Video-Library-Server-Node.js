@@ -21,6 +21,9 @@ router.post('/video/create', video_controller.video_create_post);
 // GET request to delete Video.
 router.get('/video/:id/delete', video_controller.video_delete_get);
 
+// GET request to retrieve a Video file.
+router.get('/video/:id/view', video_controller.video_file_get);
+
 // POST request to delete Video.
 router.post('/video/:id/delete', video_controller.video_delete_post);
 

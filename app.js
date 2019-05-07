@@ -10,6 +10,8 @@ var usersRouter = require('./routes/users');
 var libraryRouter = require('./routes/library');
 
 var app = express();
+var cors = require('cors');
+app.use(cors());
 
 // Set up mongoose connection
 var mongoose = require('mongoose');

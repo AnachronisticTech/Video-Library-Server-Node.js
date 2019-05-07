@@ -30,7 +30,8 @@ exports.video_list = function(req, res, next) {
         .sort([['title', 'ascending']])
         .exec(function (err, list_videos) {
             if (err) { return next(err); }
-            res.render('video_list', {title: 'Video list', video_list: list_videos});
+            // res.render('video_list', {title: 'Video list', video_list: list_videos});
+            res.send(list_videos);
         });
 };
 
@@ -51,9 +52,33 @@ exports.video_detail = function(req, res, next) {
             return next(err);
         }
         // Successful, so render.
-        res.render('video_detail', { title: 'Title', video: results.video } );
+        // res.render('video_detail', { title: 'Title', video: results.video } );
+        res.send(results.video);
     });
 };
+
+// Provide link to video file
+exports.video_file_get = function(req, res, next) {
+    async.parallel({
+        video: function(callback) {
+
+            Video.findById(req.params.id)
+              .populate('tags')
+              .exec(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.video==null) { // No results.
+            var err = new Error('Video not found');
+            err.status = 404;
+            return next(err);
+        }
+        // Successful, so render.
+        // res.render('video_detail', { title: 'Title', video: results.video } );
+        res.sendFile(results.video.filename, {root: './public/new_videos/'});
+    });
+
+}
 
 // Display video create form on GET.
 exports.video_create_get = function(req, res, next) {
