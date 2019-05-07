@@ -8,6 +8,8 @@ block content
             a(href=val.url) #{val.name}
             if index < video.tags.length - 1
                |, 
+    video(width='600', controls)
+        source(src='/new_videos/'+encodeURI(video.filename), type='video/mp4')
   
     div(style='margin-left:20px;margin-top:20px')
         hr

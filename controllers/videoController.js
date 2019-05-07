@@ -98,7 +98,7 @@ exports.video_create_post = [
         dl.on('end', function() {
             console.log('Download complete');
             console.log('filename: '+filename);
-            fs.rename('./public/new_videos/tmp.mp4','./public/new_videos/'+filename+'.mp4', function(err) {
+            fs.rename('./public/new_videos/tmp.mp4','./public/new_videos/'+filename, function(err) {
                 if (err) {console.log('Could not rename: '+err);}
             });
         })
