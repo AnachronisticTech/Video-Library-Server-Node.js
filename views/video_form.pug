@@ -1,0 +1,52 @@
+extends layout
+
+block content
+    h1= title
+
+    form(method='POST', action='')
+        div.form-group
+            label(for='link') Youtube link:
+            input#link.form-control(type='text', name='link', required='true')
+        button.btn.btn-primary(type='submit') Submit
+
+        if errors 
+            ul
+                for error in errors
+                    li!= error.msg
+
+    //- form(method='POST' action='' enctype='multipart/form-data')
+    //-     div.form-group
+    //-         label(for='filename') File:
+    //-         input#filename.form-control(type='file', name='filename')
+    //-     div.form-group
+    //-         label(for='title') Title:
+    //-         input#title.form-control(type='text', placeholder='Name of video' name='title' required='true' value=(undefined===video ? '' : video.title) )
+    //-     div.form-group
+    //-         label(for='producer') Producer:
+    //-         select#producer.form-control(type='select', placeholder='Select producer' name='producer' required='true' )
+    //-             for producer in producers
+    //-                 if video
+    //-                     //- Handle GET form, where video.producer is an object, and POST form, where it is a string.
+    //-                     option(
+    //-                         value=producer._id
+    //-                         selected=(
+    //-                             producer._id.toString()==video.producer._id
+    //-                             || producer._id.toString()==video.producer
+    //-                         ) ? 'selected' : false
+    //-                     ) #{producer.name}
+    //-                 else
+    //-                     option(value=producer._id) #{producer.name}
+    //-     div.form-group
+    //-         label(for='summary') Summary:
+    //-         textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' rows='3' required='true') #{undefined===video ? '' : video.summary}
+    //-     //- div.form-group
+    //-     //-     label(for='isbn') ISBN:
+    //-     //-     input#isbn.form-control(type='text', placeholder='ISBN13' name='isbn' value=(undefined===video ? '' : video.isbn) required='true') 
+    //-     div.form-group
+    //-         label Tags:
+    //-             div
+    //-                 for tag in tags
+    //-                     div(style='display: inline; padding-right:10px;')
+    //-                         input.checkbox-input(type='checkbox', name='tag', id=tag._id, value=tag._id, checked=tag.checked )
+    //-                         label(for=tag._id) #{tag.name}
+    //-     button.btn.btn-primary(type='submit') Submit

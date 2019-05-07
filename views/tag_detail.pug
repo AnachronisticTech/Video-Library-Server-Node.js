@@ -1,0 +1,22 @@
+extends layout
+
+block content
+
+    h1 Tag: #{tag.name}
+  
+    div(style='margin-left:20px;margin-top:20px')
+
+        h4 Videos
+        
+        dl
+            each video in tag_videos
+                dt 
+                    a(href=video.url) #{video.title}
+                dd #{video.summary}
+
+            else
+                p This tag has no videos
+		
+        hr
+        p
+            a(href=tag.url+'/delete') Delete tag

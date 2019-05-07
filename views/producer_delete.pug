@@ -1,0 +1,27 @@
+extends layout
+
+block content
+    h1 #{title}: #{producer.name}
+    
+    if producer_videos.length
+    
+        p #[strong Delete the following videos before attempting to delete this producer.]
+    
+        div(style='margin-left:20px;margin-top:20px')
+
+            h4 Books
+
+            dl
+            each video in producer_videos
+                dt 
+                    a(href=video.url) #{video.title}
+                dd #{video.summary}
+
+    else
+        p Do you really want to delete this producer?
+        
+        form(method='POST' action='')
+            div.form-group
+                input#producerid.form-control(type='hidden',name='producerid', required='true', value=producer._id )
+
+                button.btn.btn-primary(type='submit') Delete

@@ -1,0 +1,13 @@
+extends layout
+
+block content
+    h1= title
+  
+    ul
+        each video in video_list
+            li 
+                a(href=video.url) #{video.title} 
+                //- |   (#{video.producer.name})
+
+        else
+            li There are no videos.

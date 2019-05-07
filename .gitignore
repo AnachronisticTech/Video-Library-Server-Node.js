@@ -1,3 +1,4 @@
 *.bat
 node_modules/*
 populatedb.js
+*.mp4

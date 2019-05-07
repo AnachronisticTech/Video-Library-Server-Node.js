@@ -27,7 +27,7 @@ exports.tag_detail = function(req, res, next) {
         },
 
         tag_videos: function(callback) {
-            Video.find({ 'tag': req.params.id })
+            Video.find({ 'tags': req.params.id })
               .exec(callback);
         },
 
@@ -75,13 +75,44 @@ exports.tag_create_post = [
 ];
 
 // Display Tag delete form on GET.
-exports.tag_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Tag delete GET');
+exports.tag_delete_get = function(req, res, next) {
+    async.parallel({
+        tag: function(callback) {
+            Tag.findById(req.params.id).exec(callback);
+        },
+        tags_videos: function(callback) {
+            Video.find({'tag': req.params.id}).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) {return next(err);}
+        if (results.tag == null) {
+            res.redirect('/library/tags');
+        }
+        res.render('tag_delete', {title: 'Delete Tag', tag: results.tag, tag_videos: results.tags_videos});
+    });
 };
 
 // Handle Tag delete on POST.
-exports.tag_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Tag delete POST');
+exports.tag_delete_post = function(req, res, next) {
+    async.parallel({
+        tag: function(callback) {
+            Tag.findById(req.body.tagid).exec(callback);
+        },
+        tags_videos: function(callback) {
+            Video.find({'tag': req.body.tagid}).exec(callback);
+        },
+    }, function(err, results) {
+        if (err) {return next(err);}
+        if (results.tags_videos.length > 0) {
+            res.render('tag_delete', {title: 'Delete Tag', tag: results.tag, tag_videos: results.tag_videos});
+            return;
+        } else {
+            Tag.findByIdAndRemove(req.body.tagid, function deleteTag(err) {
+                if (err) {return next(err);}
+                res.redirect('/library/tags');
+            });
+        }
+    });
 };
 
 // Display Tag update form on GET.

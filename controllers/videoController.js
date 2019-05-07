@@ -2,6 +2,8 @@ var Video = require('../models/video');
 var Tag = require('../models/tag');
 var Producer = require('../models/producer');
 var async = require('async');
+var fs = require('fs');
+var ydl = require('youtube-dl');
 
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
@@ -38,13 +40,8 @@ exports.video_detail = function(req, res, next) {
         video: function(callback) {
 
             Video.findById(req.params.id)
-              .populate('tag')
+              .populate('tags')
               .exec(callback);
-        },
-        video_instance: function(callback) {
-
-          VideoInstance.find({ 'video': req.params.id })
-          .exec(callback);
         },
     }, function(err, results) {
         if (err) { return next(err); }
@@ -54,7 +51,7 @@ exports.video_detail = function(req, res, next) {
             return next(err);
         }
         // Successful, so render.
-        res.render('video_detail', { title: 'Title', video: results.video, video_instances: results.video_instance } );
+        res.render('video_detail', { title: 'Title', video: results.video } );
     });
 };
 
@@ -64,6 +61,9 @@ exports.video_create_get = function(req, res, next) {
         tags: function(callback) {
             Tag.find(callback);
         },
+        producers: function(callback) {
+            Producer.find(callback);
+        }
     }, function(err, results) {
         if (err) {return next(err);}
         res.render('video_form', {title: 'Create Video', producers: results.producers, tags: results.tags});
@@ -72,48 +72,61 @@ exports.video_create_get = function(req, res, next) {
 
 // Handle video create on POST.
 exports.video_create_post = [
+    body('link', 'Link must not be empty').isLength({min: 1}).trim(),
+    // sanitizeBody('*').escape(),
     (req, res, next) => {
-        if (!(req.body.tag instanceof Array)) {
-            if (typeof req.body.tag === 'undefined') {
-                req.body.tag = [];
-            } else {
-                req.body.tag = new Array(req.body.tag);
-            }
-        }
-        next();
-    },
-    sanitizeBody('tag.*').escape(),
-    body('title', 'Title must not be empty').isLength({min: 1}).trim(),
-    body('summary', 'Summary must not be empty').isLength({min: 1}).trim(),
-    sanitizeBody('*').escape(),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        var video = new Video({
-            title: req.body.title,
-            summary: req.body.summary,
-            tag: req.body.tag
-        });
-        if (!errors.isEmpty()) {
-            async.parallel({
-                tags: function(callback) {
-                    Tag.find(callback);
-                }
-            }, function(err, results) {
-                if (err) {return next(err);}
-                for (let i = 0; i < results.tags.length; i++) {
-                    if (video.tag.indexOf(results.tags[i]._id) > -1) {
-                        results.tags[i].checked = 'true';
-                    }
-                }
-                res.render('video_form', {title: 'Create Video', tags: results.tags, video: video, errors: errors.array()});
+        // const errors = validationResult(req);
+        var link = decodeURI(req.body.link);
+        var filename = '';
+        var dl = ydl(link, ['--format=18', '-i']); // <-- SETTINGS FOR YOUTUBE-DL HERE
+        dl.on('info', function(info) {
+            console.log('Download started');
+            console.log('filename: ' + info._filename);
+            filename = info._filename;
+            console.log('size: ' + info.size);
+            var video = new Video({
+                title: filename,
+                filename: filename,
+                tags: [],
             });
-            return;
-        } else {
             video.save(function(err) {
                 if (err) {return next(err);}
                 res.redirect(video.url);
             });
-        }
+        })
+        dl.pipe(fs.createWriteStream('./public/new_videos/tmp.mp4'));
+        dl.on('end', function() {
+            console.log('Download complete');
+            console.log('filename: '+filename);
+            fs.rename('./public/new_videos/tmp.mp4','./public/new_videos/'+filename+'.mp4', function(err) {
+                if (err) {console.log('Could not rename: '+err);}
+            });
+        })
+        // var video = new Video({
+        //     title: filename,
+        //     filename: filename,
+        // });
+        // if (!errors.isEmpty()) {
+        //     async.parallel({
+        //         tags: function(callback) {
+        //             Tag.find(callback);
+        //         }
+        //     }, function(err, results) {
+        //         if (err) {return next(err);}
+        //         for (let i = 0; i < results.tags.length; i++) {
+        //             if (video.tag.indexOf(results.tags[i]._id) > -1) {
+        //                 results.tags[i].checked = 'true';
+        //             }
+        //         }
+        //         res.render('video_form', {title: 'Create Video', tags: results.tags, video: video, errors: errors.array()});
+        //     });
+        //     return;
+        // } else {
+            // video.save(function(err) {
+            //     if (err) {return next(err);}
+            //     res.redirect(video.url);
+            // });
+        // }
     }
 ];
 
@@ -131,10 +144,13 @@ exports.video_delete_post = function(req, res) {
 exports.video_update_get = function(req, res, next) {
     async.parallel({
         video: function(callback) {
-            Video.findById(req.params.id).populate('tag').exec(callback);
+            Video.findById(req.params.id).populate('tags').exec(callback);
         },
         tags: function(callback) {
             Tag.find(callback);
+        },
+        producers: function(callback) {
+            Producer.find(callback);
         }
     }, function(err, results) {
         if (err) {return next(err);}
@@ -144,13 +160,13 @@ exports.video_update_get = function(req, res, next) {
             return next(err);
         }
         for (var all_g_iter = 0; all_g_iter < results.tags.length; all_g_iter++) {
-            for (var video_g_iter = 0; video_g_iter < results.video.tag.length; video_g_iter++) {
-                if (results.tags[all_g_iter]._id.toString() == results.video.tag[video_g_iter]._id.toString()) {
+            for (var video_g_iter = 0; video_g_iter < results.video.tags.length; video_g_iter++) {
+                if (results.tags[all_g_iter]._id.toString() == results.video.tags[video_g_iter]._id.toString()) {
                     results.tags[all_g_iter].checked = 'true';
                 }
             }
         }
-        res.render('video_form', {title: 'Update Video', tags: results.tags, video: results.video});
+        res.render('video_update', {title: 'Update Video', tags: results.tags, producers: results.producers, video: results.video});
     });
 };
 
@@ -167,16 +183,24 @@ exports.video_update_post = [
         next();
     },
     body('title','Title must not be empty').isLength({min: 1}).trim(),
-    body('summary','Summary must not be empty').isLength({min: 1}).trim(),
     sanitizeBody('title').escape(),
     sanitizeBody('summary').escape(),
-    sanitizeBody('tag.*').escape(),
+    sanitizeBody('producer').escape(),
+    sanitizeBody('tags.*').escape(),
     (req, res, next) => {
         const errors = validationResult(req);
+        // if (typeof req.body.producer !== 'undefined' && !Producer.findById(req.body.producer)) {
+        //     var producer = new Producer({
+        //         name: req.body.producer,
+        //     });
+        //     producer.save(function(err) {
+        //         if (err) {return next(err);}
+        //     });
+        // }
         var video = new Video({
             title: req.body.title,
             summary: req.body.summary,
-            tag: (typeof req.body.tag === 'undefined') ? [] : req.body.tag,
+            tags: (typeof req.body.tag === 'undefined') ? [] : req.body.tag,
             _id: req.params.id
         });
         if (!errors.isEmpty()) {
@@ -186,12 +210,14 @@ exports.video_update_post = [
                 }
             }, function(err, results) {
                 if (err) {return next(err);}
-                for (let i = 0; i < results.tags.length; i++) {
-                    if (video.tag.indexOf(results.tags[i]._id) > -1) {
-                        results.tags[i].checked = 'true';
+                // if (!typeof results.tags === 'undefined') {
+                    for (let i = 0; i < results.tags.length; i++) {
+                        if (video.tag.indexOf(results.tags[i]._id) > -1) {
+                            results.tags[i].checked = 'true';
+                        }
                     }
-                }
-                res.render('video_form', {title: 'Update Video', tags: results.tags, video: video, errors: errors.array()});
+                // }
+                res.render('video_update', {title: 'Update Video', tags: results.tags, video: video, errors: errors.array()});
                 return;
             });
         } else {

@@ -1,0 +1,27 @@
+extends layout
+
+block content
+    h1 #{title}: #{tag.name}
+    
+    if tag_videos.length
+    
+        p #[strong Delete the following videos before attempting to delete this tag.]
+    
+        div(style='margin-left:20px;margin-top:20px')
+
+            h4 Books
+
+            dl
+            each video in tag_videos
+                dt 
+                    a(href=video.url) #{video.title}
+                dd #{video.summary}
+
+    else
+        p Do you really want to delete this tag?
+        
+        form(method='POST' action='')
+            div.form-group
+                input#tagid.form-control(type='hidden',name='tagid', required='true', value=tag._id )
+
+                button.btn.btn-primary(type='submit') Delete

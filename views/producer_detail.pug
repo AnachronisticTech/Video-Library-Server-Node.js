@@ -1,0 +1,23 @@
+extends layout
+
+block content
+
+    h1 Producer: #{producer.name}
+    p #{producer.lifespan}
+    
+    div(style='margin-left:20px;margin-top:20px')
+
+        h4 Videos
+		
+        dl
+            each video in producer_videos
+                dt 
+                    a(href=video.url) #{video.title}
+                dd #{video.summary}
+
+            else
+                p This producer has no videos.
+		
+        hr
+        p
+            a(href=producer.url+'/delete') Delete producer
