@@ -14,7 +14,8 @@ exports.tag_list = function(req, res, next) {
         .exec(function (err, list_tags) {
             if (err) { return next(err); }
             // Successful, so render
-            res.render('tag_list', { title: 'Tag List', tag_list: list_tags });
+            // res.render('tag_list', { title: 'Tag List', tag_list: list_tags });
+            res.send(list_tags);
         });
 };
 
