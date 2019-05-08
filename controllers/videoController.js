@@ -26,7 +26,7 @@ exports.index = function(req, res) {
 
 // Display list of all videos.
 exports.video_list = function(req, res, next) {
-    Video.find()
+    Video.find().populate({path: 'tags', select: '-__v'})
         .sort([['title', 'ascending']])
         .exec(function (err, list_videos) {
             if (err) { return next(err); }
@@ -41,7 +41,7 @@ exports.video_detail = function(req, res, next) {
         video: function(callback) {
 
             Video.findById(req.params.id)
-              .populate('tags')
+              .populate({path: 'tags', select: 'name -_id'})
               .exec(callback);
         },
     }, function(err, results) {
