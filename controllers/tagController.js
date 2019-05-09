@@ -10,7 +10,7 @@ exports.tag_list = function(req, res, next) {
     // Display list of all VideoInstances.
     
     Tag.find()
-        .populate('tag')
+        .populate('tag').select('name')
         .exec(function (err, list_tags) {
             if (err) { return next(err); }
             // Successful, so render
