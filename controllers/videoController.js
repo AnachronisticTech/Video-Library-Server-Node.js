@@ -103,7 +103,7 @@ exports.video_create_post = [
         // const errors = validationResult(req);
         var link = decodeURI(req.body.link);
         var filename = '';
-        var dl = ydl(link, ['--format=18', '-i']); // <-- SETTINGS FOR YOUTUBE-DL HERE
+        var dl = ydl(link, ['--format=best', '-i']); // <-- SETTINGS FOR YOUTUBE-DL HERE
         dl.on('info', function(info) {
             console.log('Download started');
             console.log('filename: ' + info._filename);
